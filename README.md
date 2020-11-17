@@ -16,14 +16,20 @@ Kulbir Singh Ahluwalia, Email: kulbir@umd.edu
 ## How to use:
 
 ### Requirements
-	This project requires Visual Studio. We have used VS 2019 for building it
+This uploaded files requires Visual Studio. We have used VS 2019 for building it. 
+However, you can install OpenGL and run with your chice of development environemtn as well.
 
 
 ### Steps
-	1. Clone the directory
-	2. Go to the `OpenGL_Visual_Studio` directoty inside the project
-	3. Open the `OpenGL.sln` file in visual Studio
+
+1. Voronoi Partitioning
+	1. Run `python3 voronoi.py 0 0 800 600 6`, where the argument represtent the rectangle boundary and teyh number of robots
+2. Lawnmower Algorithm
+	1. Copy the `voronoi.txt` file into `OpenGL_Visual_Studio/OpenGL/` folder
+	2. Open the `OpenGL.sln` file in visual Studio
+	3. Update Line 30 in `main.cpp` to ```#define inputfilename "voronoi.txt"```
 	4. Build and Run the project
+
 
 
 
