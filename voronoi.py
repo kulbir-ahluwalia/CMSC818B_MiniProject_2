@@ -2,6 +2,7 @@ from scipy.spatial import Voronoi, voronoi_plot_2d
 import matplotlib.pyplot as plt
 import numpy as np
 import sys
+import argparse
 
 
 #bound (b1 (up-left), b2 (up-right), b3 (down-right), b4 (down-left))
@@ -54,10 +55,22 @@ def sortVertices(array):
 
 
 
+parser = argparse.ArgumentParser()
+
+parser.add_argument('lower_left_x', type=float, help="Lower left point of the boundary, for x coordinate")
+parser.add_argument('lower_left_y', type=float, help="Lower left point of the boundary, for y coordinate")
+parser.add_argument('upper_right_x', type=float, help= "Upper right point of the boundary, for for x coordinate")
+parser.add_argument('upper_right_y', type=float, help= "Upper right point of the boundary, for for y coordinate")
+parser.add_argument('num_agents', type=int, help= "Number of agents")
 
 
-bound= np.array([[float(sys.argv[1]), float(sys.argv[2])],[float(sys.argv[3]), float(sys.argv[4])]])
-num_a= int(sys.argv[5])
+
+
+args = parser.parse_args()
+
+
+bound= np.array([[args.lower_left_x, args.lower_left_y],[args.upper_right_x, args.upper_right_y]])
+num_a= args.num_agents
 
 
 
