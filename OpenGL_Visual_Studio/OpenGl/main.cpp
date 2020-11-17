@@ -18,18 +18,18 @@ using namespace std;
 
 #define pi (2*acos(0.0))
 #define eps 0.000001
+/* Environment Definition Parameters */
+#define N 200 // Number of grid cells along the x-axis
+#define M 150 // Number of grid cells along the y-axis
+#define cpx 4 // Multiplier to help in moving. Note that N*cpx and M*cpx shoudl match the dimentsion of teh boundary rectangle used in voronoi.py
+#define numobs 40 // Number of obstacles
+#define crange 40 // Visibility Range of the UGV sensors
+#define osa 10 // mean of the dimensions of the obstacles in terms of the grid cell size
+#define osd 5 // deviation of the dimensions of the obstacles in terms of the grid cell size
+#define lmax 500.0 // l^{start} maximum latency value
+#define inputfilename "voronoi_6.txt"  // Name of the file generted by the vornoi.py program
 
-#define N 200
-#define M 150
-#define cpx 4
-#define numobs 40
-#define crange 40
-#define osa 10
-#define osd 5
-#define lmax 500.0
-#define inputfilename "voronoi_6.txt"
-
-
+/* Variables*/
 int G[N][M];
 bool B[N][M];
 int T;
@@ -39,73 +39,73 @@ vector<int> scl;
 
 FILE* finv;
 
-
+// Max Function
 double max2(double a, double b)
 {
     return (a > b) ? a : b;
 }
-
+// Min Function
 double min2(double a, double b)
 {
     return (a < b) ? a : b;
 }
 
-
+// Class to define a point
 class point
 {
 public:
     double x, y;
     point(double xx = 0.0, double yy = 0.0)
     {
-        x = xx;
-        y = yy;
+        x = xx; // X-coordinate
+        y = yy; // Y-coordiante
     }
 };
-
+// Class to define a scanline for Lawnmower algorithm
 class scanline
 {
 public:
-    int rownum;
-    int scol;
-    int ecol;
-    int cnt;
-    int ub;
-    int lb;
+    int rownum; // Row number
+    int scol;   // Start column
+    int ecol;   // End Column
+    int cnt;    // Count of cells
+    int ub;     // Ubber bound
+    int lb;     // Lower bound
     scanline()
     {
-        rownum = scol = ecol = cnt = ub = lb = -1;
+        rownum = scol = ecol = cnt = ub = lb = -1; // initialize all to -1
     }
 };
 
-
+// Class to define a cell
 class cell
 {
 public:
-    int x, y;
-    point c;
+    int x, y; // X-y location
+    point c; // Point in this cell
     cell(int xx = 0, int yy = 0)
     {
-        x = xx;
-        y = yy;
-        c.x = (x + 0.5) * cpx;
+        x = xx; // X-coordinate
+        y = yy; // Y-coordinate
+        c.x = (x + 0.5) * cpx; 
         c.y = (y + 0.5) * cpx;
     }
 };
-
+// Class to define an observation
 class obs
 {
 public:
-    double xl, xh, yl, yh;
+    double xl, xh, yl, yh;  // x-y coordinates of the lower left and upper right corner of the rectangle
     obs(double xxl = 0.0, double xxh = 0.0, double yyl = 0.0, double yyh = 0.0)
     {
-        xl = xxl;
-        xh = xxh;
-        yl = yyl;
-        yh = yyh;
+        xl = xxl; // x-coordinate of the lower left corner
+        xh = xxh; // x-coordinate of the upper right corner
+        yl = yyl; // y-coordinate of the lower left corner
+        yh = yyh; // y-cooridnate of the upper right corner
     }
 };
 
-
+/* Define vectors to contain observations, scanlines, etc*/
 vector<obs> obsdata;
 vector<point> vors;
 vector< vector<point> > allvors;
@@ -116,25 +116,25 @@ vector<cell> traj;
 vector< vector<cell> > alltraj;
 
 
-
+// Function to print the parameters of the pbservation
 void po(obs o)
 {
     cout << o.xl << " " << o.xh << " " << o.yl << " " << o.yh << endl;
 }
 
-
+// Function to print teh x,y coordinates of the point
 void ppoint(point p)
 {
     cout << p.x << " " << p.y << endl;
 }
-
+// Function to check if two observations are intersecting
 bool doesint1(obs a, obs b)
 {
     if (((b.xl <= a.xl && a.xl <= b.xh) || (b.xl <= a.xh && a.xh <= b.xh) || (a.xl <= b.xl && b.xl <= a.xh) || (a.xl <= b.xh && b.xh <= a.xh)) && ((b.yl <= a.yl && a.yl <= b.yh) || (b.yl <= a.yh && a.yh <= b.yh) || (a.yl <= b.yl && b.yl <= a.yh) || (a.yl <= b.yh && b.yh <= a.yh)))return true;
 
     return false;
 }
-
+// Function to check if an observation intersects with any observations in the list/vector
 bool doesintn(vector<obs> ol, obs o)
 {
     int i;
@@ -142,14 +142,14 @@ bool doesintn(vector<obs> ol, obs o)
 
     return false;
 }
-
+// Function to check if a point is inside an observation
 bool isinside1(obs o, point p)
 {
     if (o.xl < p.x + eps && p.x < o.xh + eps && o.yl < p.y + eps && p.y < o.yh + eps)return true;
 
     return false;
 }
-
+// Function to check if a point is inside any observation in a list/vector
 bool isinsiden(vector<obs> ol, point p)
 {
     int i;
@@ -162,7 +162,7 @@ bool isinsiden(vector<obs> ol, point p)
 //generate obstacles uniformly over the environment at random
 void genobs()
 {
-    obsdata.clear();
+    obsdata.clear(); // clear the vector vector
 
     obs o;
     int i, ri, rii;
@@ -252,7 +252,7 @@ vector<obs> rangequery(point p)
     return ret;
 }
 
-
+// OpenGL function to draw a square
 void drawSquare(double x, double y, double s)
 {
     glBegin(GL_QUADS); {
@@ -263,7 +263,7 @@ void drawSquare(double x, double y, double s)
     }glEnd();
 }
 
-
+// OpenGL  function to draw a circle
 void drawCircle(double x, double y, double radius, double h)
 {
     int i;
@@ -288,7 +288,7 @@ void drawCircle(double x, double y, double radius, double h)
     }
 }
 
-
+// OpenGL function to lcapture keyboard events
 void keyboardListener(unsigned char key, int x, int y) {
     switch (key) {
 
@@ -301,7 +301,7 @@ void keyboardListener(unsigned char key, int x, int y) {
     }
 }
 
-
+// OpenGL to capture special keyboard events
 void specialKeyListener(int key, int x, int y) {
     switch (key) {
     case GLUT_KEY_DOWN:		//down arrow key
@@ -332,7 +332,7 @@ void specialKeyListener(int key, int x, int y) {
     }
 }
 
-
+// OpenGL function to capture mouse events
 void mouseListener(int button, int state, int x, int y) {	//x, y is the x-y of the screen (2D)
     switch (button) {
     case GLUT_LEFT_BUTTON:
@@ -357,7 +357,7 @@ void mouseListener(int button, int state, int x, int y) {	//x, y is the x-y of t
 
 
 
-
+// OpenGL funtion to display the environment
 void display() {
 
     //clear the display
