@@ -22,7 +22,7 @@ However, you can install OpenGL and run with your chice of development environem
 
 ### Steps
 
-1. Voronoi Partitioning
+1. Voronoi Partitioning Algorithm
 	1. Run `python3 voronoi.py 0 0 800 600 6`, where the argument represtent the rectangle boundary and teyh number of robots
 2. Lawnmower Algorithm
 	1. Copy the `voronoi.txt` file into `OpenGL_Visual_Studio/OpenGL/` folder
@@ -31,6 +31,9 @@ However, you can install OpenGL and run with your chice of development environem
 	4. Build and Run the project
 
 
+- For experiment on changing the number of UGVs: Generate voronoi.txt with the required number of robots (last argument)
+- For experiment on changing the number of obstacles: Update Line 25 of main.cpp as desired
+- For experiemnt on changing the visibility range of UGVs: Update line 26 of main.cpp as desired
 
 
 
