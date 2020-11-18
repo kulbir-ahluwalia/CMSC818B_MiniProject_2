@@ -16,8 +16,8 @@ Kulbir Singh Ahluwalia, Email: kulbir@umd.edu
 ## How to use:
 
 ### Requirements
-This uploaded files requires Visual Studio. We have used VS 2019 for building it. 
-However, you can install OpenGL and run with your chice of development environemtn as well.
+This uploaded files requires Visual Studio. We have used VS2019 for building it. 
+However, you can install OpenGL and run with your choice of development environement as well. The CodeBlock project for this project is available [here](https://drive.google.com/file/d/1OWLsFMHUw359kQPCIbOT_pCztAVQi8Ag/view?usp=sharing)
 
 
 ### Steps
@@ -34,18 +34,6 @@ However, you can install OpenGL and run with your chice of development environem
 - For experiment on changing the number of UGVs: Generate voronoi.txt with the required number of robots (last argument)
 - For experiment on changing the number of obstacles: Update Line 25 of main.cpp as desired
 - For experiemnt on changing the visibility range of UGVs: Update line 26 of main.cpp as desired
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
