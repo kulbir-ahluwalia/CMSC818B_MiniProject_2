@@ -16,7 +16,7 @@ Kulbir Singh Ahluwalia, Email: kulbir@umd.edu
 ## How to use:
 
 ### Requirements
-This uploaded files requires Visual Studio. We have used VS2019 for building it. 
+This project runs on Windows. The uploaded files require Visual Studio. We have used VS2019 for building it. 
 However, you can install OpenGL and run with your choice of development environement as well. The CodeBlock project for this project is available [here](https://drive.google.com/file/d/1OWLsFMHUw359kQPCIbOT_pCztAVQi8Ag/view?usp=sharing)
 
 
