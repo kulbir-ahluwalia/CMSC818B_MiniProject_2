@@ -1,8 +1,8 @@
-# CMSC818B_MiniProject_2
+# CMSC818B Mini Project 2
 
-Paper to be covered: Multi-Agent Coverage in Urban Environments  
+Paper to be covered: [Multi-Agent Coverage in Urban Environments](https://arxiv.org/pdf/2008.07436.pdf ). Authors: Shivang Patel, Senthil Hariharan, Pranav Dhulipala, Ming C Lin, Dinesh Manocha, Huan Xu, Michael Otte
 
-Link to the paper: https://arxiv.org/pdf/2008.07436.pdf  
+**Short Summary**: We use the Multi-Agent Voronoi Cover Algorithm (Patel et al.) to solve perform path-plannign for Persistent Monitoring problem. ((Link to the project)[https://sites.google.com/view/miniproject2/home])
 
 
 Team - Members:      
@@ -16,8 +16,8 @@ Kulbir Singh Ahluwalia, Email: kulbir@umd.edu
 ## How to use:
 
 ### Requirements
-This uploaded files requires Visual Studio. We have used VS 2019 for building it. 
-However, you can install OpenGL and run with your chice of development environemtn as well.
+This project runs on Windows. The uploaded files require Visual Studio. We have used VS2019 for building it. 
+However, you can install OpenGL and run with your choice of development environement as well. The CodeBlock project for this project is available [here](https://drive.google.com/file/d/1OWLsFMHUw359kQPCIbOT_pCztAVQi8Ag/view?usp=sharing)
 
 
 ### Steps
@@ -34,18 +34,6 @@ However, you can install OpenGL and run with your chice of development environem
 - For experiment on changing the number of UGVs: Generate voronoi.txt with the required number of robots (last argument)
 - For experiment on changing the number of obstacles: Update Line 25 of main.cpp as desired
 - For experiemnt on changing the visibility range of UGVs: Update line 26 of main.cpp as desired
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
