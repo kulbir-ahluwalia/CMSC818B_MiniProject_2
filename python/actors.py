@@ -1,15 +1,26 @@
 import pygame
+import pygame.gfxdraw
 import numpy as np
 
 class Player():
-    def __init__(self, pos, color, size):
+    def __init__(self, pos, color='g', size=5):
         self.pos = np.array(pos)
         self.color = color 
         self.size = size
         self.prev_action = None
+        
+        self.COLOR = None
+        if self.color == 'r':
+            self.COLOR = (255,0,0)
+        elif self.color == 'g':
+            self.COLOR = (0, 255, 0)
+        elif self.color == 'b':
+            self.COLOR = (0, 0, 255)
+        else:
+            self.COLOR = (255, 255, 255)
 
-    def move(self, action, step_size=1):
-        global canvas
+
+    def move(self, action, step_size=1, canvas=None):
         if action == 'up':
             motion = np.array([-step_size,0])
         elif action == 'down':
@@ -40,25 +51,26 @@ class Player():
          
 
     def update(self, canvas):
-        if self.color == 'r':
-            COLOR = (255,0,0)
-        elif self.color == 'g':
-            COLOR = (0, 255, 0)
-        elif self.color == 'b':
-            COLOR = (0, 0, 255)
-        else:
-            COLOR = (255, 255, 255)
-        
-        
-        pygame.draw.circle(canvas.screen, COLOR, self.pos, self.size)
+        pygame.draw.circle(canvas.screen, self.COLOR, self.pos, self.size)
         pygame.draw.circle(canvas.screen, (0,0,0), self.pos, min(1, self.size//5))
         
         
 
 class Obstacle():
-    def __init__ (self, pos, size):
+    def __init__ (self, pos, color='r', size=[10,20]):
         self.pos = pos
         self.size = size
+        self.color = color
+
+        self.COLOR = None
+        if self.color == 'r':
+            self.COLOR = (255,0,0)
+        elif self.color == 'g':
+            self.COLOR = (0, 255, 0)
+        elif self.color == 'b':
+            self.COLOR = (0, 0, 255)
+        else:
+            self.COLOR = (255, 255, 255)
 
 #         self.rect = patches.Rectangle(pos, self.size[0], self.size[1], linewidth=0,edgecolor='blue',facecolor='blue')
         
@@ -89,23 +101,37 @@ class Obstacle():
 #         self.rect.set_xy(self.pos)
 #         ax.add_patch(self.rect)
 
-        pygame.draw.rect(canvas.screen, (255,0,0), [self.pos[0], self.pos[1], self.size[0], self.size[1]])
+        pygame.draw.rect(canvas.screen, self.COLOR, [self.pos[0], self.pos[1], self.size[0], self.size[1]])
         
         
 class Drone():
-    def __init__(self, pos, color, size):
+    def __init__(self, pos, color='b', size=30):
         self.pos = np.array(pos)
-        self.color = color 
+        self.color = color
         self.size = size
 
-        self.view =  patches.Rectangle(self.pos, self.size, self.size, linewidth=0, edgecolor=self.color, facecolor=self.color)
-        self.view.set_alpha(0.3)
+        self.COLOR = None
+        self.view_COLOR = None
+        if self.color == 'r':
+            self.COLOR = (255,0,0)
+            self.view_COLOR = (192,0,0)
+        elif self.color == 'g':
+            self.COLOR = (0, 255, 0)
+            self.view_COLOR = (0,192,0)
+        elif self.color == 'b':
+            self.COLOR = (0, 0, 255)
+            self.view_COLOR = (0,0,192)
+        else:
+            self.COLOR = (255, 255, 255)
+            self.view_COLOR = (192,192,192)
 
-        self.circle = patches.Circle(self.pos, self.size//10, fc='black')
-        self.circle.set_alpha(1.0)
+        # self.view =  patches.Rectangle(self.pos, self.size, self.size, linewidth=0, edgecolor=self.color, facecolor=self.color)
+        # self.view.set_alpha(0.3)
 
-    def move(self, action, step_size=2):
-        global canvas
+        # self.circle = patches.Circle(self.pos, self.size//10, fc='black')
+        # self.circle.set_alpha(1.0)
+
+    def move(self, action, step_size=2, canvas=None):
         if action == 'up':
             motion = np.array([-step_size,0])
         elif action == 'down':
@@ -117,14 +143,14 @@ class Drone():
 
         self.pos += motion
 
-        if self.pos[0]-self.size < 0:
-            self.pos[0] = 0 + self.size//2
-        if self.pos[0] + self.size//2 >= canvas.width-1:
-            self.pos[0] = canvas.width - self.size//2 - 1
-        if self.pos[1] - self.size//2 < 0:
-            self.pos[1] = 0 + self.size//2
-        if self.pos[1] + self.size//2 >= canvas.height-1:
-            self.pos[1] = canvas.height - self.size//2 - 1
+        if self.pos[0] < 0:
+            self.pos[0] = 0 
+        if self.pos[0] + self.size >= canvas.width-1:
+            self.pos[0] = canvas.width - self.size- 1
+        if self.pos[1] < 0:
+            self.pos[1] = 0 
+        if self.pos[1] + self.size >= canvas.height-1:
+            self.pos[1] = canvas.height - self.size - 1
         
         # if self.pos[0] < 0:
         #     self.pos[0] = 0 
@@ -138,13 +164,7 @@ class Drone():
          
 
     def update(self, canvas):
-        self.circle.center = self.pos
-        self.view.set_xy((self.pos[0] - self.size//2, self.pos[1] - self.size//2))
+        pygame.draw.rect(canvas.screen, self.view_COLOR, [self.pos[0], self.pos[1], self.size, self.size])
+        # pygame.gfxdraw.box(canvas.screen, self.COLOR+(128,), [self.pos[0], self.pos[1], self.size, self.size])
+        pygame.draw.circle(canvas.screen, self.COLOR, self.pos, min(1,self.size//10))
         
-
-        ax.add_patch(self.view)
-        ax.add_patch(self.circle)
-
-        return self.circle
-
-    

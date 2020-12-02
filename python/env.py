@@ -1,6 +1,6 @@
 import pygame
 import numpy as np
-
+import cv2
 
 class Canvas():
     def __init__(self, screenWidth , screenHeight):
@@ -20,7 +20,7 @@ class Canvas():
 
     
     def update(self):
-        temp_surf = pygame.Surface(self.grid.shape)
+        temp_surf = pygame.Surface(self.grid.shape, pygame.SRCALPHA)
         pygame.surfarray.array_to_surface(temp_surf, np.transpose(np.tile(self.grid,(3,1,1)),(1,2,0)))
         self.screen.blit(temp_surf, (0, 0))
     
@@ -88,21 +88,124 @@ def process_into_image(canvas, playerList, obstacleList, droneList):
 
 def process_img(coverage, img_bgr):
     drone_cover = img_bgr[:,:,0]
+    
     coverage[coverage > 0] -= 5
     coverage[coverage < 0] = 0
     coverage[img_bgr[:,:,1] == 255] = 255
+
     obstacle = img_bgr[:,:,2]
     
 
     data_img = np.stack([drone_cover, coverage, obstacle], axis=2)
-    # data_img[data_img[:,:,1] > 0, 1] -= 2 
-    # data_img[img_bgr[:,:,1] == 255, 1] = 255
-    
-    # data_img[img_bgr[:,:,2] == 255, 1] = 0
-    # data_img[img_bgr[:,:,2] == 255, 2] = 255
-    
-    # coverage[data_img[:,:,1] > 0] = 255
-    
-    
-
     return data_img, coverage
+
+
+
+def get_coverage(img_bgr):
+    return img_bgr[:,:,1].astype(int)
+
+def get_obstacles(img_bgr):
+    return (img_bgr[:,:,2] > 0).astype(int)
+
+def get_droneview2(drone_map, img_bgr, latency_factor):
+    prev_map = drone_map.astype(int)
+    drone_map = np.clip(prev_map-latency_factor, 0, 255).astype(np.uint8)
+    drone_mask = img_bgr[:,:,0] > 0
+    drone_map[:,:,1][drone_mask] = img_bgr[:,:,1][drone_mask]
+    drone_map[:,:,2][drone_mask] = img_bgr[:,:,2][drone_mask]
+
+    return drone_map
+
+def get_droneview(drone_map, img_bgr, latency_factor, droneList):
+    prev_map = drone_map.astype(int)
+    drone_map = np.clip(prev_map-latency_factor, 0, 255).astype(np.uint8)
+    
+    for drone in droneList:
+        drone_map[drone.pos[0]:drone.pos[0]+drone.size, drone.pos[1]:drone.pos[1]+drone.size,1:] = img_bgr[drone.pos[0]:drone.pos[0]+drone.size, drone.pos[1]:drone.pos[1]+drone.size,1:]
+
+   
+    return drone_map
+
+
+def update_all(canvas, playerList, obstacleList, droneList):
+    ## Update the environment
+    patch = canvas.update()
+    
+    ## Update the drone
+    for drone in droneList:
+        patch = drone.update(canvas)
+    
+    ## Update the robot locations
+    for player in playerList:
+        patch = player.update(canvas)
+
+    ## Update the obstacles
+    for obstacle in obstacleList:
+        patch = obstacle.update(canvas)
+
+     
+
+def process_screen(my_coverage, my_canvas):
+    ### Create the images
+    pygame.display.flip()
+    # data_img = process_into_image(canvas, playerList, obstacleList, droneList)
+    
+    #convert image so it can be displayed in OpenCV
+    view = pygame.surfarray.array3d(my_canvas.screen)
+
+    #  convert from (width, height, channel) to (height, width, channel)
+    view = view.transpose([1, 0, 2])
+
+    #  convert from rgb to bgr
+    img_bgr = cv2.cvtColor(view, cv2.COLOR_RGB2BGR)
+    # Convert from x-y format to row-column format and get images as numpy array
+    xv, yv = np.meshgrid(range(img_bgr.shape[0]), range(img_bgr.shape[1]), indexing='ij')
+    data_img, my_coverage = process_img(my_coverage, img_bgr[yv, xv])
+    
+     ## Clip the values to void overflow
+    data_img = np.clip(img_bgr[yv, xv].astype(int) + data_img.astype(int), a_min=0, a_max=255)
+    
+    ## Update pygame environemnt
+    surf = pygame.surfarray.make_surface(data_img)
+    my_canvas.screen.blit(surf, (0, 0))
+    
+    ## Convert data type from int to bytes
+    data_img = data_img.astype(np.uint8)
+
+
+    return my_coverage, data_img
+
+
+def init_env(canvas, playerList, obstacleList, droneList):
+    covergae = np.zeros(canvas.grid.shape, dtype=np.uint8)
+    data_img = np.zeros(canvas.grid.shape+(3,), dtype=np.uint8)
+
+    patch = canvas.update()
+    ## Update the drone
+    for drone in droneList:
+        patch = drone.update(canvas)
+    covergae, temp_img = process_screen(covergae, canvas)
+
+    data_img[:,:,0] = temp_img[:,:,0]
+
+    patch = canvas.update()
+    ## Update the robot locations
+    for player in playerList:
+        patch = player.update(canvas)
+    covergae, temp_img = process_screen(covergae, canvas)
+
+    data_img[:,:,1] = temp_img[:,:,1]
+
+
+    patch = canvas.update()
+    ## Update the obstacles
+    for obstacle in obstacleList:
+        patch = obstacle.update(canvas)
+    covergae, temp_img = process_screen(covergae, canvas)
+
+    data_img[:,:,2] = temp_img[:,:,2]
+    data_img[temp_img[:,:,2] > 0, 1 ] = 0
+    # cv2_imshow(data_img)
+
+    return data_img
+
