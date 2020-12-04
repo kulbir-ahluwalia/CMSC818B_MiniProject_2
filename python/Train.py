@@ -1,7 +1,6 @@
 import warnings
 
 warnings.filterwarnings('ignore')
-import keyboard
 
 import numpy as np
 from env import Env
