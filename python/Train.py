@@ -3,7 +3,7 @@ import warnings
 warnings.filterwarnings('ignore')
 
 import numpy as np
-from env import Env
+# from env import Env
 from tqdm import tqdm
 import cv2
 from collections import defaultdict
@@ -17,10 +17,15 @@ CONST = CONSTANTS()
 
 np.set_printoptions(threshold=np.inf, linewidth=1000, precision=3, suppress=True)
 
+# env = Env()
+height, width = 300, 300
+robot_info = [20, 10, 10, 0, 260, 10, 200, 10, 10, 250, 200, 10]
+drone_info = [150, 150, 100]
+num_obstacles = 40 # number of objects
+drone_latency = 2
 
+env = PMGridEnv(height, width, robot_info, drone_info, num_obstacles, drone_latency)
 
-
-env = Env()
 
 memory = Memory(CONST.NUM_AGENTS)
 rlAgent = PPO(env)
