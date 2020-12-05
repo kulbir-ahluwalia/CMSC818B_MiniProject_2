@@ -63,20 +63,25 @@ class ActorCritic(nn.Module):
         #                )
 
         self.feature1 = nn.Sequential(
-            nn.Conv2d(2, 16, (8, 8), 4, 1),
+            nn.Conv2d(3, 8, (7, 7)),
+            nn.MaxPool2d((2,2)),
             nn.ReLU(),
-            nn.Conv2d(16, 32, (4, 4), 2, 1),
+            nn.Conv2d(8, 16, (5, 5)),
+            nn.MaxPool2d((2,2)),
             nn.ReLU(),
-            nn.Conv2d(32, 32, (3, 3), 1, 1),
+            nn.Conv2d(16, 32, (3, 3)),
+            nn.MaxPool2d((2,2)),
             nn.ReLU(),
             nn.Flatten()
         )
         self.reg1 = nn.Sequential(
-            nn.Linear(2 * 2 * 32, 500),
+            nn.Linear(34 * 34 * 32, 1024),
             nn.ReLU(),
-            nn.Linear(500, 256),
+            nn.Linear(1024, 256),
             nn.ReLU(),
-            nn.Linear(256, len(env.get_action_space())),
+            nn.Linear(256, 32),
+            nn.ReLU(),
+            nn.Linear(32, env.get_action_space().n),
             nn.Softmax(dim=-1)
         )
 
@@ -105,20 +110,25 @@ class ActorCritic(nn.Module):
         #                )
 
         self.feature2 = nn.Sequential(
-            nn.Conv2d(2, 16, (8, 8), 4, 1),
+            nn.Conv2d(3, 8, (7, 7)),
+            nn.MaxPool2d((2,2)),
             nn.ReLU(),
-            nn.Conv2d(16, 32, (4, 4), 2, 1),
+            nn.Conv2d(8, 16, (5, 5)),
+            nn.MaxPool2d((2,2)),
             nn.ReLU(),
-            nn.Conv2d(32, 32, (3, 3), 1, 1),
+            nn.Conv2d(16, 32, (3, 3)),
+            nn.MaxPool2d((2,2)),
             nn.ReLU(),
             nn.Flatten()
         )
         self.reg2 = nn.Sequential(
-            nn.Linear(2 * 2 * 32, 500),
+            nn.Linear(34 * 34 * 32, 1024),
             nn.ReLU(),
-            nn.Linear(500, 256),
+            nn.Linear(1024, 256),
             nn.ReLU(),
-            nn.Linear(256, 1)
+            nn.Linear(256, 32),
+            nn.ReLU(),
+            nn.Linear(32, 1)
         )
 
         self.train()
