@@ -14,7 +14,7 @@ from constants import CONSTANTS
 CONST = CONSTANTS()
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-
+torch.set_default_dtype(torch.float32)
 
 class Memory:
     def __init__(self, num_agents):
@@ -75,11 +75,9 @@ class ActorCritic(nn.Module):
             nn.Flatten()
         )
         self.reg1 = nn.Sequential(
-            nn.Linear(34 * 34 * 32, 1024),
+            nn.Linear(34 * 34 * 32, 512),
             nn.ReLU(),
-            nn.Linear(1024, 256),
-            nn.ReLU(),
-            nn.Linear(256, 32),
+            nn.Linear(512, 32),
             nn.ReLU(),
             nn.Linear(32, env.get_action_space().n),
             nn.Softmax(dim=-1)
@@ -122,11 +120,9 @@ class ActorCritic(nn.Module):
             nn.Flatten()
         )
         self.reg2 = nn.Sequential(
-            nn.Linear(34 * 34 * 32, 1024),
+            nn.Linear(34 * 34 * 32, 512),
             nn.ReLU(),
-            nn.Linear(1024, 256),
-            nn.ReLU(),
-            nn.Linear(256, 32),
+            nn.Linear(512, 32),
             nn.ReLU(),
             nn.Linear(32, 1)
         )
@@ -239,13 +235,16 @@ class PPO:
         mem_sz = len(memory.states)
         # Optimize policy for K epochs:
         for _ in range(self.K_epochs):
-            prev = 0
-            for i in range(minibatch_sz, mem_sz + 1, minibatch_sz):
+            # prev = 0
+            # for i in range(minibatch_sz, mem_sz + 1, minibatch_sz):
+            # UPDATE: changed the loop implementation
+            for i in range(0, mem_sz, minibatch_sz):
                 #                print(prev,i, minibatch_sz, mem_sz)
-                mini_old_states = memory.states[prev:i]
-                mini_old_actions = memory.actions[prev:i]
-                mini_old_logprobs = memory.logprobs[prev:i]
-                mini_rewards = all_rewards[prev:i]
+                # print(i, mem_sz, minibatch_sz)
+                mini_old_states = memory.states[i*minibatch_sz:(i+1)*minibatch_sz]
+                mini_old_actions = memory.actions[i*minibatch_sz:(i+1)*minibatch_sz]
+                mini_old_logprobs = memory.logprobs[i*minibatch_sz:(i+1)*minibatch_sz]
+                mini_rewards = all_rewards[i*minibatch_sz:(i+1)*minibatch_sz]
 
                 # convert list to tensor
                 old_states = torch.stack(mini_old_states).to(device).detach()
@@ -253,7 +252,8 @@ class PPO:
                 old_logprobs = torch.stack(mini_old_logprobs).to(device).detach()
                 rewards = mini_rewards  # torch.from_numpy(mini_rewards).float().to(device)
 
-                prev = i
+                # UPDATE: changed as per new loop implementation
+                # prev = i
 
                 # Evaluating old actions and values :
                 logprobs, state_values, dist_entropy = self.policy.evaluate(old_states, old_actions)
@@ -266,8 +266,9 @@ class PPO:
                 #            advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-5)
                 surr1 = ratios * advantages
                 surr2 = torch.clamp(ratios, 1 - self.eps_clip, 1 + self.eps_clip) * advantages
-                loss = -torch.min(surr1, surr2).mean() + 0.5 * self.MseLoss(state_values,
-                                                                            rewards) - 0.01 * dist_entropy.mean()
+                ## Converting loss inputs to float to avoid Double  (float64) error
+                loss = -torch.min(surr1, surr2).mean() + 0.5 * self.MseLoss(state_values.float(),
+                                                                            rewards.float()) - 0.01 * dist_entropy.mean()
 
                 # take gradient step
                 self.optimizer.zero_grad()
