@@ -8,6 +8,12 @@ from gym import spaces
 from actors import Player, Obstacle, Drone
 from custom_algorithms import *
 
+try:
+    from google.colab import output
+    from google.colab.patches import cv2_imshow
+except ImportError:
+    pass
+
 N_DISCRETE_ACTIONS = 4
 
 class Canvas():
