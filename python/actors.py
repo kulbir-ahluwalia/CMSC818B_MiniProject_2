@@ -3,11 +3,12 @@ import pygame.gfxdraw
 import numpy as np
 
 class Player():
-    def __init__(self, pos, color='g', size=5):
+    def __init__(self, pos, color='g', size=5, step_size=1):
         self.pos = np.array(pos)
         self.color = color 
         self.size = size
         self.prev_action = None
+        self.step_size = step_size
         
         self.COLOR = None
         if self.color == 'r':
@@ -20,7 +21,12 @@ class Player():
             self.COLOR = (255, 255, 255)
 
 
-    def move(self, action, step_size=1, canvas=None):
+    def move(self, action, step_size=None, canvas=None):
+        if step_size is None:
+            step_size = self.step_size
+        else:
+            self.step_size = step_size
+
         if action == 'up':
             motion = np.array([-step_size,0])
         elif action == 'down':
@@ -57,10 +63,11 @@ class Player():
         
 
 class Obstacle():
-    def __init__ (self, pos, color='r', size=[10,20]):
+    def __init__ (self, pos, color='r', size=[10,20], step_size=0):
         self.pos = pos
         self.size = size
         self.color = color
+        self.step_size = step_size
 
         self.COLOR = None
         if self.color == 'r':
@@ -75,8 +82,12 @@ class Obstacle():
 #         self.rect = patches.Rectangle(pos, self.size[0], self.size[1], linewidth=0,edgecolor='blue',facecolor='blue')
         
 
-    def move(self, action, step_size=0):
-        global canvas
+    def move(self, action, step_size=None, canvas=None):
+        if step_size is None:
+            step_size = self.step_size
+        else:
+            self.step_size = step_size
+        
         if action == 'up':
             motion = np.array([-step_size,0])
         elif action == 'down':
@@ -105,10 +116,11 @@ class Obstacle():
         
         
 class Drone():
-    def __init__(self, pos, color='b', size=30):
+    def __init__(self, pos, color='b', size=30, step_size=20):
         self.pos = np.array(pos)
         self.color = color
         self.size = size
+        self.step_size = step_size
 
         self.COLOR = None
         self.view_COLOR = None
@@ -132,6 +144,11 @@ class Drone():
         # self.circle.set_alpha(1.0)
 
     def move(self, action, step_size=2, canvas=None):
+        if step_size is None:
+            step_size = self.step_size
+        else:
+            self.step_size = step_size
+        
         if action == 'up':
             motion = np.array([-step_size,0])
         elif action == 'down':
@@ -166,5 +183,5 @@ class Drone():
     def update(self, canvas):
         pygame.draw.rect(canvas.screen, self.view_COLOR, [self.pos[1], self.pos[0], self.size, self.size])
         # pygame.gfxdraw.box(canvas.screen, self.COLOR+(128,), [self.pos[0], self.pos[1], self.size, self.size])
-        pygame.draw.circle(canvas.screen, self.COLOR, self.pos[::-1], min(1,self.size//10))
+        pygame.draw.circle(canvas.screen, self.COLOR, self.pos[::-1], min(1,self.size//5))
         
