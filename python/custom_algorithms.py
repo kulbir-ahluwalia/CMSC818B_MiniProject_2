@@ -14,8 +14,8 @@ move_dict = {
 }
 
 ## Function to check if a location is valid (within grid)
-def is_valid(pos, limits):
-    if ((pos[0] < 0) or (pos[1] < 0) or (pos[0] >= limits[0]) or (pos[1] >= limits[1])):
+def is_valid(pos, size, limits):
+    if ((pos[0] < size) or (pos[1] < size) or (pos[0] >= limits[0]-size-1) or (pos[1] >= limits[1]-size-1)):
         return False
     else:
         return True
@@ -23,8 +23,8 @@ def is_valid(pos, limits):
 ## Greedy algorithm (distributed)
 def greedy_algorithm(player, data_img):
     pos = player.pos #get player location
-    obstacle = data_img[:,:,2].astype(int) # get grid indicating where objects are
-    covered = (data_img[:,:,1]).astype(int) # get grid indicating which areas have been covered and how much latency is there
+    obstacle = data_img[:,:,2].astype(int)/255.# get grid indicating where objects are
+    covered = (data_img[:,:,1]).astype(int)/255. # get grid indicating which areas have been covered and how much latency is there
     # covered[data_img[:,:,1] == 255] = 0
     cost_grid = obstacle*10 + covered # give high cost to obstacles
 
@@ -44,7 +44,7 @@ def greedy_algorithm(player, data_img):
         
         temp_pos = pos + move
         # print('CHECK: ', pos, temp_pos, new_action)
-        if not is_valid(temp_pos, data_img.shape[:2]):
+        if not is_valid(temp_pos, player.size, data_img.shape[:2]):
             # print('NOT Valid: ', pos, temp_pos)
             temp_action_list.append(new_action)
             temp_cost_list.append(50000)
@@ -64,8 +64,8 @@ def greedy_algorithm(player, data_img):
     # update last action
     player.prev_action = new_action
     
-    # if teh move is not valid, do not move
-    if not is_valid(temp_pos, data_img.shape[:2]):
+    # if the move is not valid, do not move
+    if not is_valid(temp_pos, player.size, data_img.shape[:2]):
         temp_pos = pos
         
     return temp_pos
