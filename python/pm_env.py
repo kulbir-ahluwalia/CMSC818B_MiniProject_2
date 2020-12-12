@@ -17,11 +17,11 @@ except ImportError:
 N_DISCRETE_ACTIONS = 4
 
 class Canvas():
-    def __init__(self, screenWidth , screenHeight):
-        self.width = screenWidth
+    def __init__(self, screenHeight , screenWidth):
         self.height = screenHeight
+        self.width = screenWidth
         
-        self.grid = np.zeros((self.width , self.height),dtype=int)
+        self.grid = np.zeros((self.height, self.width),dtype=int)
         
         
         pygame.init()
@@ -34,8 +34,9 @@ class Canvas():
 
     
     def update(self):
-        temp_surf = pygame.Surface(self.grid.shape, pygame.SRCALPHA)
-        pygame.surfarray.array_to_surface(temp_surf, np.transpose(np.tile(self.grid,(3,1,1)),(1,2,0)))
+        temp_surf = pygame.Surface(self.grid.shape[::-1], pygame.SRCALPHA)
+        # pygame.surfarray.array_to_surface(temp_surf, np.transpose(np.tile(self.grid,(3,1,1)),(1,2,0)))
+        pygame.surfarray.array_to_surface(temp_surf, np.transpose(np.tile(self.grid,(3,1,1)),(2,1,0)))
         self.screen.blit(temp_surf, (0, 0))
     
 
@@ -386,18 +387,18 @@ class PMGridEnv(gym.Env):
         r_ind_min = max(0, -(center[0]-radius))
         c_ind_min = max(0, -(center[1]-radius))
 
-        if center[0]+radius+1 <= self.canvas.width:
+        if center[0]+radius+1 <= self.canvas.height:
             r_ind_max = 2*radius+1
         else:
-            r_ind_max = -(center[0]+radius -self.canvas.width)-1
+            r_ind_max = -(center[0]+radius -self.canvas.height)-1
         
         if center[1]+radius+1 <= self.canvas.width:
             c_ind_max = 2*radius+1
         else:
-            c_ind_max = -(center[1]+radius - self.canvas.height)-1
+            c_ind_max = -(center[1]+radius - self.canvas.width)-1
         
-        player_area[max(0, center[0]-radius) : min(center[0]+radius+1, self.canvas.width), 
-                    max(0, center[1]-radius) : min(center[1]+radius+1, self.canvas.height)] = valid_array[r_ind_min:r_ind_max, c_ind_min:c_ind_max]
+        player_area[max(0, center[0]-radius) : min(center[0]+radius+1, self.canvas.height), 
+                    max(0, center[1]-radius) : min(center[1]+radius+1, self.canvas.width)] = valid_array[r_ind_min:r_ind_max, c_ind_min:c_ind_max]
         
         
     for obstacle in self.obstacleList:
@@ -435,23 +436,29 @@ class PMGridEnv(gym.Env):
     #convert image so it can be displayed in OpenCV
     view = pygame.surfarray.array3d(self.canvas.screen)
     #  convert from (width, height, channel) to (height, width, channel)
+    
     view = view.transpose([1, 0, 2])
 
     #  convert from rgb to bgr
     img_bgr = cv2.cvtColor(view, cv2.COLOR_RGB2BGR)
+    
     # Convert from x-y format to row-column format and get images as numpy array
-    xv, yv = np.meshgrid(range(img_bgr.shape[0]), range(img_bgr.shape[1]), indexing='ij')
-    self.env_img, self.coverage = self.process_img(self.coverage, img_bgr[yv, xv])
+    xv, yv = np.meshgrid(range(img_bgr.shape[1]), range(img_bgr.shape[0]), indexing='ij')
+    # self.env_img, self.coverage = self.process_img(self.coverage, img_bgr[yv, xv])
+    self.env_img, self.coverage = self.process_img(self.coverage, img_bgr)
     
-     ## Clip the values to void overflow
-    self.env_img = np.clip(img_bgr[yv, xv].astype(int) + self.env_img.astype(int), a_min=0, a_max=255)
-    
-    ## Update pygame environemnt
-    surf = pygame.surfarray.make_surface(self.env_img)
-    self.canvas.screen.blit(surf, (0, 0))
-    
+    ## Clip the values to void overflow
+    # self.env_img = np.clip(img_bgr[yv, xv].astype(int) + self.env_img.astype(int), a_min=0, a_max=255)
+    self.env_img = np.clip(img_bgr.astype(int) + self.env_img.astype(int), a_min=0, a_max=255)
+
     ## Convert data type from int to bytes
     self.env_img = self.env_img.astype(np.uint8)
+
+    ## Update pygame environemnt
+    surf = pygame.surfarray.make_surface(self.env_img.transpose((1,0,2)))
+    self.canvas.screen.blit(surf, (0, 0))
+    
+    
 
   def get_coverage(self, img_bgr):
     return img_bgr[:,:,1].astype(int)
