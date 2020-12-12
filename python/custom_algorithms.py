@@ -69,3 +69,34 @@ def greedy_algorithm(player, data_img):
         temp_pos = pos
         
     return temp_pos
+
+
+
+def drone_lawnmower(drone, canvas):
+    row_pos, col_pos = drone.pos
+    height, width = canvas.height, canvas.width
+
+    num_r = int(np.ceil((height - drone.size) / drone.step_size))
+    num_c = int(np.ceil((width - drone.size) / drone.step_size))
+
+
+    env_action_list = ['up', 'down', 'left', 'right']
+    action_list = []
+    for i in range(num_r):
+        for j in range(num_c):
+            if i%2:
+                action_list.append(2)
+            else:
+                action_list.append(3)
+        action_list.append(1)
+
+    action_list.extend([0]*(num_r - 0))
+    action_list.extend([2]*(num_c - 0))
+
+    start_idx = height*row_pos
+    if col_pos%2:
+        start_idx += col_pos
+    else:
+        start_idx += (width - col_pos)
+    
+    return start_idx, action_list
