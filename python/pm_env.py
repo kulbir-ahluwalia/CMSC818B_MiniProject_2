@@ -292,7 +292,7 @@ class PMGridEnv(gym.Env):
 
     ### Update drones' locations
     for drone in self.droneList:
-         drone.move(self.action_list[action], drone.size//10, self.canvas)
+         drone.move(self.action_list[action], drone.step_size, self.canvas)
 
     ### Update graphics
     self.update_all() 
@@ -474,3 +474,4 @@ class PMGridEnv(gym.Env):
         drone_map[drone.pos[0]:drone.pos[0]+drone.size, drone.pos[1]:drone.pos[1]+drone.size,1:] = img_bgr[drone.pos[0]:drone.pos[0]+drone.size, drone.pos[1]:drone.pos[1]+drone.size,1:]
    
     return drone_map
+
