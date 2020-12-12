@@ -142,11 +142,11 @@ class Player_Lawnmower:
         action_list.extend(['up']*(num_r - 0))
         action_list.extend(['left']*(num_c - 0))
 
-        start_idx = height*row_pos//player.size
+        start_idx = height*row_pos//player.step_size
         if row_pos%2:
             start_idx += (width - col_pos)//player.step_size
         else:
-            start_idx += col_pos//player.size
+            start_idx += col_pos//player.step_size
         print(num_r, num_c, start_idx)
         return start_idx, action_list
 
