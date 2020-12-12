@@ -32,14 +32,14 @@ class Player():
 
         self.pos += motion
 
-        if self.pos[0]-self.size < 0:
+        if self.pos[0] <= self.size:
             self.pos[0] = 0+self.size
-        if self.pos[0]+self.size >= canvas.width-1:
-            self.pos[0] = canvas.width-self.size-1
-        if self.pos[1]-self.size < 0:
+        if self.pos[0]+self.size > canvas.height-1:
+            self.pos[0] = min(self.pos[0], canvas.height-self.size-1)
+        if self.pos[1] <= self.size:
             self.pos[1] = 0+self.size
-        if self.pos[1]+self.size >= canvas.height-1:
-            self.pos[1] = canvas.height-self.size-1
+        if self.pos[1]+self.size > canvas.width-1:
+            self.pos[1] = min(self.pos[1], canvas.width-self.size-1)
         # if self.pos[0] < 0:
         #     self.pos[0] = 0 
         # if self.pos[0] >= canvas.width-1:
@@ -51,8 +51,8 @@ class Player():
          
 
     def update(self, canvas):
-        pygame.draw.circle(canvas.screen, self.COLOR, self.pos, self.size)
-        pygame.draw.circle(canvas.screen, (0,0,0), self.pos, min(1, self.size//5))
+        pygame.draw.circle(canvas.screen, self.COLOR, self.pos[::-1], self.size)
+        pygame.draw.circle(canvas.screen, (0,0,0), self.pos[::-1], min(1, self.size//5))
         
         
 
@@ -90,18 +90,18 @@ class Obstacle():
 
         if self.pos[0]-self.size[0] < 0:
             self.pos[0] = 0+self.size[0]
-        if self.pos[0]+self.size[0] >= canvas.width-1:
-            self.pos[0] = canvas.width-self.size[0]-1
+        if self.pos[0]+self.size[0] > canvas.height-1:
+            self.pos[0] = min(self.pos[0], canvas.height-self.size[0]-1)
         if self.pos[1]-self.size[1] < 0:
             self.pos[1] = 0+self.size[1]
-        if self.pos[1]+self.size[1] >= canvas.height-1:
-            self.pos[1] = canvas.height-self.size[1]-1
+        if self.pos[1]+self.size[1] > canvas.width-1:
+            self.pos[1] = min(self.pos[1], canvas.width-self.size[1]-1)
 
     def update(self, canvas):
 #         self.rect.set_xy(self.pos)
 #         ax.add_patch(self.rect)
 
-        pygame.draw.rect(canvas.screen, self.COLOR, [self.pos[0], self.pos[1], self.size[0], self.size[1]])
+        pygame.draw.rect(canvas.screen, self.COLOR, [self.pos[1], self.pos[0], self.size[1], self.size[0]])
         
         
 class Drone():
@@ -145,13 +145,13 @@ class Drone():
 
         if self.pos[0] < 0:
             self.pos[0] = 0 
-        if self.pos[0] + self.size >= canvas.width-1:
-            self.pos[0] = canvas.width - self.size- 1
+        if self.pos[0] + self.size > canvas.height-1:
+            self.pos[0] = min(self.pos[0], canvas.height - self.size- 1)
         if self.pos[1] < 0:
             self.pos[1] = 0 
-        if self.pos[1] + self.size >= canvas.height-1:
-            self.pos[1] = canvas.height - self.size - 1
-        
+        if self.pos[1] + self.size > canvas.width-1:
+            self.pos[1] = min(self.pos[1], canvas.width - self.size - 1)
+            
         # if self.pos[0] < 0:
         #     self.pos[0] = 0 
         # if self.pos[0] >= canvas.width-1:
@@ -164,7 +164,7 @@ class Drone():
          
 
     def update(self, canvas):
-        pygame.draw.rect(canvas.screen, self.view_COLOR, [self.pos[0], self.pos[1], self.size, self.size])
+        pygame.draw.rect(canvas.screen, self.view_COLOR, [self.pos[1], self.pos[0], self.size, self.size])
         # pygame.gfxdraw.box(canvas.screen, self.COLOR+(128,), [self.pos[0], self.pos[1], self.size, self.size])
-        pygame.draw.circle(canvas.screen, self.COLOR, self.pos, min(1,self.size//10))
+        pygame.draw.circle(canvas.screen, self.COLOR, self.pos[::-1], min(1,self.size//10))
         
