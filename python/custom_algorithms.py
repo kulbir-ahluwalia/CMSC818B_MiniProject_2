@@ -93,10 +93,75 @@ def drone_lawnmower(drone, canvas):
     action_list.extend([0]*(num_r - 0))
     action_list.extend([2]*(num_c - 0))
 
-    start_idx = height*row_pos
-    if col_pos%2:
-        start_idx += col_pos
+    start_idx = height*row_pos//drone.step_size
+    if row_pos%2:
+        start_idx += (width - col_pos)//drone.step_size
     else:
-        start_idx += (width - col_pos)
+        start_idx += col_pos//drone.step_size
     
     return start_idx, action_list
+
+
+class Player_Lawnmower:
+    def __init__(self, playerList, canvas):
+        self.player_size = playerList[0].size
+        self.num_players = len(playerList)
+
+        height, width = canvas.height, canvas.width
+        cand_rows = [int(i*height/self.num_players) for i in range(self.num_players)]
+        # print(cand_rows)
+        self.lm_move_dict = {}
+
+        for id, player in enumerate(playerList):
+            start_idx, action_list = self.player_action_maker(player, 
+                                                        cand_rows[id], 
+                                                        (height//self.num_players, width))
+            self.lm_move_dict[id] = (start_idx, action_list)
+        
+    def player_action_maker(self, player, start_row, limits):
+        row_pos, col_pos = player.pos
+        row_pos -= start_row
+        height, width = limits
+
+        # print(row_pos, col_pos, height, width)
+
+        num_r = int(np.ceil((height - player.size) / player.step_size))
+        num_c = int(np.ceil((width - player.size) / player.step_size))
+
+        # print(num_r, num_c)
+
+        action_list = []
+        for i in range(num_r):
+            for j in range(num_c):
+                if i%2:
+                    action_list.append('left')
+                else:
+                    action_list.append('right')
+            action_list.append('down')
+
+        action_list.extend(['up']*(num_r - 0))
+        action_list.extend(['left']*(num_c - 0))
+
+        start_idx = height*row_pos//player.size
+        if row_pos%2:
+            start_idx += (width - col_pos)//player.step_size
+        else:
+            start_idx += col_pos//player.size
+        print(num_r, num_c, start_idx)
+        return start_idx, action_list
+
+    def get_generator_single(self, player_id):
+        start_loc = self.lm_move_dict[player_id][0]
+        action_list = self.lm_move_dict[player_id][1]
+        total_act = len(action_list)
+        step = 0
+        while True:
+            yield action_list[(start_loc + step)%total_act]
+            step += 1
+        
+    def get_all_generators(self):
+        self.gen_list = []
+        for i in range(self.num_players):
+            self.gen_list.append(self.get_generator_single(i))
+
+        return self.gen_list
