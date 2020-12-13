@@ -3,16 +3,15 @@ import pygame.gfxdraw
 import numpy as np
 
 class Player():
-    def __init__(self, pos, color='g', size=5, step_size=None):
+    def __init__(self, pos, color='g', size=5, step_size=1):
         self.pos = np.array(pos)
         self.color = color 
         self.size = size
         self.prev_action = None
-        if step_size is None:
-            self.step_size = self.size
-        else:
-            self.step_size = step_size
+        self.step_size = step_size
         
+        self.info = None
+
         self.COLOR = None
         if self.color == 'r':
             self.COLOR = (255,0,0)
