@@ -165,3 +165,138 @@ class Player_Lawnmower:
             self.gen_list.append(self.get_generator_single(i))
 
         return self.gen_list
+
+def info_greedy_1(player, data_img):
+    center = player.pos
+    min_size = (player.size**2)/2
+    height, width, _ = data_img.shape
+
+    m1 = (0 - center[1])/(0 - center[0])
+    m2 = (width - center[1])/(0 - center[0])
+    m3 = (0 - center[1])/(height - center[0])
+    m4 = (width - center[1])/(height - center[0])
+
+    line1 = lambda x:  x[1] - m1*(x[0] - center[0]) - center[1]
+    line2 = lambda x:  x[1] - m2*(x[0] - center[0]) - center[1]
+    line3 = lambda x:  x[1] - m3*(x[0] - center[0]) - center[1]
+    line4 = lambda x:  x[1] - m4*(x[0] - center[0]) - center[1]
+
+    xv, yv = np.meshgrid(np.arange(height), np.arange(width), indexing='ij')
+    mapping1 = np.apply_along_axis(line1, 2, np.stack([xv, yv], axis=-1))
+    mapping2 = np.apply_along_axis(line2, 2, np.stack([xv, yv], axis=-1))
+    mapping3 = np.apply_along_axis(line3, 2, np.stack([xv, yv], axis=-1))
+    mapping4 = np.apply_along_axis(line4, 2, np.stack([xv, yv], axis=-1))
+
+
+    mask1 = (mapping1 >= 0)
+    mask2 = (mapping2 >= 0)
+    mask3 = (mapping3 >= 0)
+    mask4 = (mapping4 >= 0)
+
+
+    up = mask1 & ~mask2
+    down = ~mask4 & mask3
+    left = ~mask3 & ~mask1
+    right = mask2 & mask4
+
+    mask_list = [up, right, down, left]
+
+    coverage = data_img[:,:,1]/255. + data_img[:,:,2]/255.
+    action_list = ['up', 'right', 'down', 'left']
+    cost_list = np.array([0.,0.,0.,0.])
+    size_list = np.array([0, 0, 0, 0])
+    for i in range(4):
+        # cost_list[i] = np.mean(coverage[mask_list[i]])
+        cost_list[i] = np.sum(coverage[mask_list[i]] == 0)
+        size_list[i] = coverage[mask_list[i]].shape[0]
+        
+    cost_list[size_list <= min_size] = cost_list.max()
+
+    min_cost_idx = np.argmin(cost_list)
+    
+    return action_list[min_cost_idx]
+
+def info_greedy_2(player, data_img):
+    center = player.pos
+    min_size = (player.size**2)/2
+    height, width, _ = data_img.shape
+
+    line1 = lambda x:  x[1] - x[0] - (center[1] - center[0])
+    line2 = lambda x:  x[1] + x[0] - (center[1] + center[0])
+
+    xv, yv = np.meshgrid(np.arange(height), np.arange(width), indexing='ij')
+    mapping1 = np.apply_along_axis(line1, 2, np.stack([xv, yv], axis=-1))
+    mapping2 = np.apply_along_axis(line2, 2, np.stack([xv, yv], axis=-1))
+
+
+    mask1 = (mapping1 >= 0)
+    mask2 = (mapping2 >= 0)
+
+
+    right = mask1 & mask2
+    down = ~mask1 & mask2
+    up =  mask1 & ~mask2
+    left = ~mask1 & ~mask2
+
+    mask_list = [up, right, down, left]
+
+    coverage = data_img[:,:,1]/255. + data_img[:,:,2]/255.
+
+    action_list = ['up', 'right', 'down', 'left']
+    cost_list = np.array([0.,0.,0.,0.])
+    size_list = np.array([0, 0, 0, 0])
+    for i in range(4):
+        size_list[i] = coverage[mask_list[i]].shape[0]+1
+        cost_list[i] = np.sum(coverage[mask_list[i]] == 0)/size_list[i]
+
+    
+    cost_list[size_list <= min_size+20] = cost_list.min()
+
+    #min_cost_idx = np.argmin(cost_list)
+    min_cost_idx = np.argmax(cost_list)
+
+    return action_list[min_cost_idx]
+
+
+def info_greedy_drone_2(drone, data_img):
+    center = drone.pos + drone.size//2
+    #min_size = (player.size**2)
+    height, width, _ = data_img.shape
+
+    line1 = lambda x:  x[1] - x[0] - (center[1] - center[0])
+    line2 = lambda x:  x[1] + x[0] - (center[1] + center[0])
+
+    xv, yv = np.meshgrid(np.arange(height), np.arange(width), indexing='ij')
+    mapping1 = np.apply_along_axis(line1, 2, np.stack([xv, yv], axis=-1))
+    mapping2 = np.apply_along_axis(line2, 2, np.stack([xv, yv], axis=-1))
+
+
+    mask1 = (mapping1 >= 0)
+    mask2 = (mapping2 >= 0)
+
+
+    right = mask1 & mask2
+    down = ~mask1 & mask2
+    up =  mask1 & ~mask2
+    left = ~mask1 & ~mask2
+
+    mask_list = [up, right, down, left]
+
+    coverage = data_img[:,:,1]/255. 
+    
+    action_list = ['up', 'right', 'down', 'left']
+    cost_list = np.array([0.,0.,0.,0.])
+    size_list = np.array([0, 0, 0, 0])
+    for i in range(4):
+        size_list[i] = coverage[mask_list[i]].shape[0]+1
+        cost_list[i] = np.sum(coverage[mask_list[i]]**2)
+        
+    #cost_list[size_list <= min_size] = cost_list.min()
+    min_cost_idx = np.argmax(cost_list)
+    
+    if len(np.unique(cost_list)) == 1:
+        min_cost_idx = np.random.randint(0,4)
+
+    return action_list[min_cost_idx]
+
+
