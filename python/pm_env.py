@@ -222,6 +222,7 @@ def init_env(canvas, playerList, obstacleList, droneList):
     data_img[temp_img[:,:,2] > 0, 1 ] = 0
     # cv2_imshow(data_img)
 
+
     return data_img
 
 
@@ -278,7 +279,9 @@ class PMGridEnv(gym.Env):
     self.drone_map = np.zeros(self.canvas.grid.shape+(3,), dtype=np.uint8)
     #### Saving initial state for resets
     self.inital_state = [self.playerList.copy(), self.droneList.copy(), self.obstacleList.copy()]
-
+    #### Initializing locaal info for each robot
+    for player in self.playerList:
+        player.info = self.env_img.copy()
     ### Update entites in screen
     self.update_all() 
     self.process_screen()
@@ -427,6 +430,8 @@ class PMGridEnv(gym.Env):
     obstacle = img_bgr[:,:,2]
 
     data_img = np.stack([drone_cover, coverage, obstacle], axis=2)
+    
+
     return data_img, coverage
 
   def process_screen(self):
@@ -453,6 +458,28 @@ class PMGridEnv(gym.Env):
 
     ## Convert data type from int to bytes
     self.env_img = self.env_img.astype(np.uint8)
+
+    ## Get teh coverage info so far
+    local_coverage = self.coverage.copy()
+    ## Remove older info to avoid large connected components
+    local_coverage[local_coverage < 128] = 0 
+    ## Find connected components
+    num_labels, labels_im = cv2.connectedComponents(local_coverage)
+    for player in self.playerList:
+        ## Latency
+        player.info = np.clip(player.info.astype(int)-2, 0, 255).astype(int)
+        ## Get labels for this conneted component
+        mask = (labels_im == labels_im[player.pos[0], player.pos[1]])
+        ## Include into coverage
+        player.info[:,:,1][mask] = local_coverage[mask]
+        
+        ## Get information from drone is in view
+        for drone in self.droneList:
+            if ( (drone.pos[0] <= player.pos[0] <= drone.pos[0]+drone.size) and 
+                 (drone.pos[1] <= player.pos[1] <= drone.pos[1]+drone.size)):
+                player.info = np.maximum(player.info, self.drone_map)
+
+    
 
     ## Update pygame environemnt
     surf = pygame.surfarray.make_surface(self.env_img.transpose((1,0,2)))
