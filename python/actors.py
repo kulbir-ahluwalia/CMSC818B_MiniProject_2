@@ -3,12 +3,14 @@ import pygame.gfxdraw
 import numpy as np
 
 class Player():
-    def __init__(self, pos, color='g', size=5, step_size=1):
+    def __init__(self, pos, color='g', size=5, step_size=1, num_particles= 10):
         self.pos = np.array(pos)
         self.color = color 
         self.size = size
         self.prev_action = None
         self.step_size = step_size
+        
+        self.num_particles= np.zeros((num_particles,2)).astype('int')
         
         self.info = None
 
