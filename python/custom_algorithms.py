@@ -258,7 +258,7 @@ def info_greedy_2(player, data_img):
     return action_list[min_cost_idx]
 
 
-def info_greedy_drone_2(drone, data_img):
+def info_greedy_drone_2(drone, data_img, old_img):
     center = drone.pos + drone.size//2
     #min_size = (player.size**2)
     height, width, _ = data_img.shape
@@ -282,14 +282,14 @@ def info_greedy_drone_2(drone, data_img):
 
     mask_list = [up, right, down, left]
 
-    coverage = data_img[:,:,1]/255. 
+    coverage = (data_img[:,:,1].astype(int) - old_img[:,:,1].astype(int))/255. 
     
     action_list = ['up', 'right', 'down', 'left']
     cost_list = np.array([0.,0.,0.,0.])
     size_list = np.array([0, 0, 0, 0])
     for i in range(4):
         size_list[i] = coverage[mask_list[i]].shape[0]+1
-        cost_list[i] = np.sum(coverage[mask_list[i]]**2)
+        cost_list[i] = np.sum(coverage[mask_list[i]])
         
     #cost_list[size_list <= min_size] = cost_list.min()
     min_cost_idx = np.argmax(cost_list)
@@ -297,6 +297,5 @@ def info_greedy_drone_2(drone, data_img):
     if len(np.unique(cost_list)) == 1:
         min_cost_idx = np.random.randint(0,4)
 
-    return action_list[min_cost_idx]
-
+    return action_list[min_cost_idx], up, down, left, right
 
