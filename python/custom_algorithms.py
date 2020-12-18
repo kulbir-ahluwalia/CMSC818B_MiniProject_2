@@ -76,8 +76,8 @@ def drone_lawnmower(drone, canvas):
     row_pos, col_pos = drone.pos
     height, width = canvas.height, canvas.width
 
-    num_r = int(np.ceil((height - drone.size) / drone.step_size))
-    num_c = int(np.ceil((width - drone.size) / drone.step_size))
+    num_r = int(np.ceil((height) / drone.step_size))
+    num_c = int(np.ceil((width) / drone.step_size))-1
 
 
     env_action_list = ['up', 'down', 'left', 'right']
@@ -90,16 +90,19 @@ def drone_lawnmower(drone, canvas):
                 action_list.append(3)
         action_list.append(1)
 
-    action_list.extend([0]*(num_r - 0))
-    action_list.extend([2]*(num_c - 0))
+    action_list = action_list[:-1]
+    action_list.extend([0]*(num_r - 1))
+    if num_r%2 == 1:
+        action_list.extend([2]*(num_c - 0))
 
-    start_idx = height*row_pos//drone.step_size
+    start_idx = row_pos//drone.step_size
     if row_pos%2:
         start_idx += (width - col_pos)//drone.step_size
     else:
         start_idx += col_pos//drone.step_size
     
     return start_idx, action_list
+
 
 
 class Player_Lawnmower:
