@@ -16,16 +16,30 @@ This part of the repo focuses on the UAV planning.
 
 We used latency-based particles filters and create a heatmap by dicretizating the environment and aggregating the number of partciles, to reduce the computation time. 
 Using this heatmap we developed a heiritic-based algorithms and a learning-based algorithm (using PPO). The UGVs in this scenario more randomly. 
-These algorithms are compared againg a randomly moving UAV and a fizxd-path strategy where the UAV moves on *Boustrophedon path*.
+These algorithms are compared againg a randomly moving UAV and a fizxd-path strategy where the UAV moves on *Boustrophedon path* as shown below:
+
+![lawn](./images/lawnmower.gif)
 
 #### Results
+1. Average episodic reward (calculated over 50 eppisode, easo of length 50) v/s Number of UGVs (40 obstacles). Here reward is nagative of the total latency of the map (as perceived by the UAV)
+
+![robot](images/nrobot_reward.png)
+
+2. Average episodic reward (calculated over 50 eppisode, easo of length 50) v/s Number of obstacles (4 robots). Here reward is nagative of the total latency of the map (as perceived by the UAV)
+
+![nobs](images/nobs_reward.png)
+
+##### Videos
 -   All algotihms: 
     Here the UAV's field-of-view is shown in blue, UGVs and their latencies are shown in shades of green (brighter region => least latency), and the obstacles are shwon in red. 
-    [![info_greedy](./videos/all_algo.mp4)    ]
+    
+    ![info_greedy](./images/all_algo.gif)
 
 -   Results for heuristic-based (information-greedy) algorithm, showing the environement, partcles in belief space of UAV and heatmap. 
-    [![info_greedy](./videos/info_greedy.mp4)]
+    
+    ![info_greedy](./images/info_greedy.gif)
     
 -   Results for heuristic-based (information-greedy) algorithm, showing the environement, partcles in belief space of UAV and heatmap. 
-    [![rl](./videos/rl.mp4)]
+    
+    ![rl](./images/rl.gif)
 
