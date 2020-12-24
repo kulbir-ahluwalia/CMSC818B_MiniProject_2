@@ -265,9 +265,13 @@ class PMGridEnv(gym.Env):
     c_coords = np.random.randint(0, self.canvas.width, (self.n_obj)) # random columns
     # Width and height would be chosen from 10,15,20,25,30 randomly
     for i in range(len(r_coords)):
+        scale_r = self.canvas.height/300.
+        scale_c = self.canvas.width/300.
+        length = int(scale_r * np.random.choice([10,15,20,25,30]))
+        breadth = int(scale_c * np.random.choice([10,15,20,25,30]))
+        
         self.obstacleList.append(Obstacle(pos=[r_coords[i], c_coords[i]], 
-                                    size=[np.random.choice([10,15,20,25,30]),
-                                          np.random.choice([10,15,20,25,30])]))
+                                    size=[length, breadth]))
 
     ### Environement image as a numpy array
     self.env_img   = np.zeros(self.canvas.grid.shape+(3,), dtype=np.uint8)
