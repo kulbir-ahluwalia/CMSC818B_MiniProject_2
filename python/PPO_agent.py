@@ -38,93 +38,39 @@ class ActorCritic(nn.Module):
         super(ActorCritic, self).__init__()
 
         # actor
-        #        self.feature1 = nn.Sequential(
-        #                    nn.Conv2d(1,16,(3,3),1,1),
-        #                    nn.BatchNorm2d(16),
-        #                    nn.ReLU(),
-        #                    nn.MaxPool2d(2),
-        #                    nn.Conv2d(16,32,(3,3),1,1),
-        #                    nn.BatchNorm2d(32),
-        #                    nn.ReLU(),
-        #                    nn.MaxPool2d(2),
-        #                    nn.Conv2d(32,32,(3,3),1,1),
-        #                    nn.BatchNorm2d(32),
-        #                    nn.ReLU(),
-        #                    nn.MaxPool2d(2),
-        #                    nn.Flatten()
-        #                    )
-        #        self.reg1 = nn.Sequential(
-        #                    nn.Linear(3*3*32, 500),
-        #                    nn.ReLU(),
-        #                    nn.Linear(500, 256),
-        #                    nn.ReLU(),
-        #                    nn.Linear(256, len(env.get_action_space())),
-        #                    nn.Softmax(dim=-1)
-        #                )
 
         self.feature1 = nn.Sequential(
-            nn.Conv2d(3, 8, (7, 7)),
-            nn.MaxPool2d((2,2)),
+            nn.Conv2d(1, 3, (3, 3)),
             nn.ReLU(),
-            nn.Conv2d(8, 16, (5, 5)),
-            nn.MaxPool2d((2,2)),
-            nn.ReLU(),
-            nn.Conv2d(16, 32, (3, 3)),
+            nn.Conv2d(3, 8, (3, 3)),
             nn.MaxPool2d((2,2)),
             nn.ReLU(),
             nn.Flatten()
         )
         self.reg1 = nn.Sequential(
-            nn.Linear(34 * 34 * 32, 512),
+            nn.Linear(72, 32),
             nn.ReLU(),
-            nn.Linear(512, 32),
+            nn.Linear(32, 8),
             nn.ReLU(),
-            nn.Linear(32, env.get_action_space().n),
+            nn.Linear(8, env.get_action_space().n),
             nn.Softmax(dim=-1)
-        )
 
         # critic
-        #        self.feature2 = nn.Sequential(
-        #                    nn.Conv2d(1,16,(3,3),1,1),
-        #                    nn.BatchNorm2d(16),
-        #                    nn.ReLU(),
-        #                    nn.MaxPool2d(2),
-        #                    nn.Conv2d(16,32,(3,3),1,1),
-        #                    nn.BatchNorm2d(32),
-        #                    nn.ReLU(),
-        #                    nn.MaxPool2d(2),
-        #                    nn.Conv2d(32,32,(3,3),1,1),
-        #                    nn.BatchNorm2d(32),
-        #                    nn.ReLU(),
-        #                    nn.MaxPool2d(2),
-        #                    nn.Flatten()
-        #                    )
-        #        self.reg2 = nn.Sequential(
-        #                    nn.Linear(3*3*32, 500),
-        #                    nn.ReLU(),
-        #                    nn.Linear(500, 256),
-        #                    nn.ReLU(),
-        #                    nn.Linear(256, 1)
-        #                )
 
         self.feature2 = nn.Sequential(
-            nn.Conv2d(3, 8, (7, 7)),
-            nn.MaxPool2d((2,2)),
+            nn.Conv2d(1, 3, (3, 3)),
             nn.ReLU(),
-            nn.Conv2d(8, 16, (5, 5)),
-            nn.MaxPool2d((2,2)),
-            nn.ReLU(),
-            nn.Conv2d(16, 32, (3, 3)),
+            nn.Conv2d(3, 8, (3, 3)),
             nn.MaxPool2d((2,2)),
             nn.ReLU(),
             nn.Flatten()
         )
         self.reg2 = nn.Sequential(
-            nn.Linear(34 * 34 * 32, 512),
+            nn.Linear(72, 32),
             nn.ReLU(),
-            nn.Linear(512, 32),
+            nn.Linear(32, 8),
             nn.ReLU(),
-            nn.Linear(32, 1)
+            nn.Linear(8, 1)
         )
 
         self.train()
