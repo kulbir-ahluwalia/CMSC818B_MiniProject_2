@@ -302,3 +302,19 @@ def info_greedy_drone_2(drone, data_img, old_img):
 
     return action_list[min_cost_idx], up, down, left, right
 
+def info_greddy_PF(drone, heatmap, env_action_list, grid_size=10):
+    pos_in_heatmap = (drone.pos +  drone.size//2 ) // grid_size
+
+    costs = np.zeros((5,)) 
+    costs[0] = np.sum(heatmap[:pos_in_heatmap[0], pos_in_heatmap[1]])
+    costs[1] = np.sum(heatmap[pos_in_heatmap[0]+1:, pos_in_heatmap[1]])
+    costs[2] = np.sum(heatmap[pos_in_heatmap[0], :pos_in_heatmap[1]])
+    costs[3] = np.sum(heatmap[pos_in_heatmap[0], pos_in_heatmap[1]+1 :])
+    # costs[4] = heatmap[pos_in_heatmap[0], pos_in_heatmap[1]]
+
+    if len(np.unique(costs[:4])) == 1:
+        action = np.random.choice(env_action_list)
+    else:
+        action = env_action_list[np.argmax(costs)]
+
+    return action
