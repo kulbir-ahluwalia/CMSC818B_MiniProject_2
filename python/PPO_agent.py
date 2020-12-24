@@ -54,6 +54,7 @@ class ActorCritic(nn.Module):
             nn.ReLU(),
             nn.Linear(8, env.get_action_space().n),
             nn.Softmax(dim=-1)
+        )
 
         # critic
 
